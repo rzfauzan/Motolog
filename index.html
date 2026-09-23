@@ -2,423 +2,280 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0b1220">
-<title>Motolog — Blockchain Service History</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>MotoLog — Verified Service History on BOT Chain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#07111f;
-    --bg-2:#0b1728;
-    --surface:rgba(16,30,50,.78);
-    --surface-solid:#101e32;
-    --surface-soft:#0d1a2c;
-    --line:rgba(148,163,184,.16);
-    --line-strong:rgba(148,163,184,.28);
-    --text:#f7fafc;
-    --muted:#91a4bc;
-    --primary:#35c7a3;
-    --primary-2:#20a989;
-    --blue:#4da3ff;
-    --danger:#ff6b78;
-    --warning:#f5b942;
-    --shadow:0 24px 70px rgba(0,0,0,.28);
-    --radius:22px;
+  :root {
+    --bg: #15130f;
+    --surface: #1c1912;
+    --surface-raised: #221e15;
+    --line: #3a3323;
+    --line-soft: #2a2618;
+    --ink: #ece6d6;
+    --ink-dim: #a89f89;
+    --stamp: #c1440e;
+    --stamp-dim: #8f3309;
+    --ledger: #5c9a6f;
+    --flag: #b2453f;
+    --serif: 'IBM Plex Serif', Georgia, 'Times New Roman', serif;
+    --mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0;
+    font-family: var(--serif);
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(193,68,14,0.06), transparent 40%),
+      repeating-linear-gradient(180deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
+    color: var(--ink);
+    padding: 40px 18px 70px;
+    padding-top: max(40px, env(safe-area-inset-top, 0px));
+    padding-bottom: max(70px, env(safe-area-inset-bottom, 0px));
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 620px; margin: 0 auto; }
+
+  /* ---------- Masthead ---------- */
+  .masthead { margin-bottom: 30px; }
+  .masthead .mark {
+    display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px;
+  }
+  .masthead .mark .gear { font-size: 1.3rem; line-height: 1; transform: translateY(1px); }
+  .masthead h1 {
+    font-family: var(--mono); font-weight: 700; letter-spacing: 0.5px;
+    font-size: 1.5rem; margin: 0; color: var(--ink);
+  }
+  .masthead .tagline {
+    font-size: 0.92rem; color: var(--ink-dim); margin: 0; max-width: 46ch;
+    line-height: 1.5;
+  }
+  .masthead .rule {
+    height: 1px; margin-top: 18px;
+    background: repeating-linear-gradient(90deg, var(--line) 0, var(--line) 6px, transparent 6px, transparent 11px);
   }
 
-  *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{
-    margin:0;
-    min-height:100vh;
-    color:var(--text);
-    font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-    background:
-      radial-gradient(circle at 8% 5%, rgba(53,199,163,.14), transparent 28%),
-      radial-gradient(circle at 92% 10%, rgba(77,163,255,.12), transparent 25%),
-      linear-gradient(180deg,var(--bg),#081321 55%,#06101c);
-    padding:28px 18px 56px;
+  /* ---------- Wallet strip ---------- */
+  #walletBar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 3px; padding: 13px 16px; margin: 22px 0 28px;
+  }
+  #walletStatus {
+    font-family: var(--mono); font-size: 0.78rem; color: var(--ink-dim); letter-spacing: 0.2px;
+  }
+  #walletStatus.connected { color: var(--ledger); }
+  #walletStatus.connected::before { content: "● "; }
+  #walletStatus:not(.connected)::before { content: "○ "; }
+
+  button {
+    font-family: var(--mono); font-weight: 600; font-size: 0.82rem;
+    background: var(--stamp); color: #fff7ee; border: 1px solid var(--stamp);
+    padding: 10px 18px; border-radius: 3px; cursor: pointer;
+    letter-spacing: 0.3px; transition: background 0.15s, border-color 0.15s, transform 0.05s;
+  }
+  button:hover { background: var(--stamp-dim); border-color: var(--stamp-dim); }
+  button:active { transform: translateY(1px); }
+  button:disabled { background: #423d30; border-color: #423d30; color: #857d68; cursor: not-allowed; }
+
+  /* ---------- Docket cards ---------- */
+  .docket {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 3px; padding: 22px 22px 20px; margin-bottom: 22px;
+    position: relative;
+  }
+  .docket::before {
+    content: attr(data-step);
+    position: absolute; top: 0; right: 18px; transform: translateY(-50%);
+    font-family: var(--mono); font-size: 0.7rem; font-weight: 600;
+    background: var(--bg); border: 1px solid var(--line); color: var(--ink-dim);
+    padding: 2px 8px; border-radius: 2px; letter-spacing: 1px;
+  }
+  .docket h2 {
+    font-family: var(--serif); font-weight: 600; font-size: 1.14rem;
+    margin: 0 0 6px; color: var(--ink);
+  }
+  .docket .hint {
+    font-size: 0.84rem; color: var(--ink-dim); line-height: 1.55;
+    margin: 0 0 16px; max-width: 52ch;
   }
 
-  button,input{font:inherit}
-  button{cursor:pointer}
-  .shell{width:min(1120px,100%);margin:auto}
+  label {
+    display: block; font-family: var(--mono); font-size: 0.72rem;
+    color: var(--ink-dim); margin: 12px 0 5px; letter-spacing: 0.3px;
+  }
+  input {
+    width: 100%; padding: 10px 12px; border-radius: 3px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+    font-family: var(--serif); font-size: 0.95rem;
+  }
+  input::placeholder { color: #5c563f; }
+  input:focus { outline: none; border-color: var(--stamp); }
+  input[data-mono] { font-family: var(--mono); font-size: 0.88rem; }
 
-  /* Header */
-  .topbar{
-    display:flex;align-assets:center;justify-content:space-between;gap:18px;
-    margin-bottom:28px;
-  }
-  .brand{display:flex;align-assets:center;gap:13px}
-  .brand-mark{
-    width:44px;height:44px;border-radius:14px;
-    display:grid;place-assets:center;
-    background:linear-gradient(135deg,var(--primary),#3b9fff);
-    box-shadow:0 12px 35px rgba(53,199,163,.18);
-    font-size:22px;
-  }
-  .brand strong{display:block;font-size:1.08rem;letter-spacing:.2px}
-  .brand span{display:block;color:var(--muted);font-size:.76rem;margin-top:2px}
-
-  .wallet{
-    display:flex;align-assets:center;gap:12px;
-    padding:9px 10px 9px 14px;
-    border:1px solid var(--line);
-    background:rgba(16,30,50,.72);
-    backdrop-filter:blur(14px);
-    border-radius:999px;
-  }
-  .wallet-status{display:flex;align-assets:center;gap:8px;color:var(--muted);font-size:.8rem}
-  .dot{width:8px;height:8px;border-radius:50%;background:#64748b}
-  .dot.connected{background:var(--primary);box-shadow:0 0 0 4px rgba(53,199,163,.1)}
-  .btn{
-    border:0;border-radius:12px;padding:10px 15px;
-    color:#04120f;background:var(--primary);
-    font-weight:800;font-size:.82rem;
-    transition:.18s ease;box-shadow:0 10px 25px rgba(53,199,163,.12);
-  }
-  .btn:hover{transform:translateY(-1px);background:#4ad5b4}
-  .btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
-  .btn.secondary{color:var(--text);background:#17283e;box-shadow:none;border:1px solid var(--line)}
-  .btn.secondary:hover{background:#1b304a}
-  .btn.small{padding:8px 11px;border-radius:10px;font-size:.75rem}
-
-  /* Hero */
-  .hero{
-    display:grid;grid-template-columns:1.35fr .65fr;gap:18px;
-    margin-bottom:18px;
-  }
-  .hero-card,.network-card,.panel{
-    border:1px solid var(--line);
-    background:linear-gradient(145deg,rgba(17,33,55,.92),rgba(10,23,39,.82));
-    box-shadow:var(--shadow);
-    backdrop-filter:blur(18px);
-  }
-  .hero-card{
-    border-radius:28px;padding:34px;position:relative;overflow:hidden;
-  }
-  .hero-card:after{
-    content:"";position:absolute;width:280px;height:280px;border-radius:50%;
-    right:-120px;top:-130px;background:rgba(53,199,163,.09);filter:blur(2px)
-  }
-  .eyebrow{
-    display:inline-flex;align-assets:center;gap:8px;
-    color:#8debd4;font-size:.72rem;font-weight:800;
-    text-transform:uppercase;letter-spacing:.12em;
-    margin-bottom:13px;
-  }
-  .eyebrow:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--primary)}
-  h1{font-size:clamp(2rem,4.5vw,3.35rem);line-height:1.03;letter-spacing:-.045em;margin:0 0 14px;max-width:700px}
-  .hero-copy{color:var(--muted);line-height:1.65;max-width:680px;margin:0;font-size:.96rem}
-  .hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
-  .network-card{border-radius:28px;padding:24px}
-  .network-card h3{margin:0 0 5px;font-size:.85rem}
-  .network-card p{margin:0;color:var(--muted);font-size:.75rem;line-height:1.55}
-  .network-pill{
-    display:flex;align-assets:center;gap:10px;margin:20px 0 15px;
-    padding:13px;border:1px solid rgba(53,199,163,.2);
-    background:rgba(53,199,163,.06);border-radius:15px
-  }
-  .network-icon{width:34px;height:34px;display:grid;place-assets:center;border-radius:10px;background:rgba(53,199,163,.12)}
-  .network-pill strong{display:block;font-size:.85rem}
-  .network-pill span{color:var(--muted);font-size:.7rem}
-  .network-note{font-size:.7rem!important}
-
-  /* Steps */
-  .section-title{display:flex;align-assets:end;justify-content:space-between;gap:15px;margin:30px 0 12px}
-  .section-title h2{font-size:1.15rem;margin:0}
-  .section-title p{font-size:.75rem;color:var(--muted);margin:3px 0 0}
-  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
-  .step{
-    border:1px solid var(--line);background:rgba(13,26,44,.74);
-    border-radius:18px;padding:17px;display:flex;gap:13px
-  }
-  .step-num{
-    flex:0 0 34px;height:34px;border-radius:11px;display:grid;place-assets:center;
-    background:rgba(53,199,163,.1);color:#8debd4;font-weight:900;font-size:.8rem
-  }
-  .step strong{display:block;font-size:.82rem;margin-bottom:4px}
-  .step span{display:block;color:var(--muted);font-size:.71rem;line-height:1.5}
-
-  /* Panels */
-  .panel{border-radius:var(--radius);padding:25px;margin-top:18px}
-  .panel-head{display:flex;align-assets:flex-start;justify-content:space-between;gap:18px;margin-bottom:20px}
-  .panel-title{display:flex;gap:12px}
-  .panel-icon{
-    width:38px;height:38px;flex:0 0 38px;border-radius:12px;
-    display:grid;place-assets:center;background:#142a42;border:1px solid var(--line)
-  }
-  .panel h2{font-size:1rem;margin:0 0 4px}
-  .panel-desc{color:var(--muted);font-size:.75rem;line-height:1.55;margin:0}
-  .tag{
-    white-space:nowrap;border:1px solid var(--line);color:#a8b8cc;
-    background:#0b1829;border-radius:999px;padding:6px 9px;font-size:.65rem
+  .row-actions {
+    margin-top: 18px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
   }
 
-  .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-  .field.full{grid-column:1/-1}
-  label{display:block;color:#b6c4d6;font-size:.72rem;font-weight:700;margin:0 0 7px}
-  input{
-    width:100%;border:1px solid var(--line);border-radius:12px;
-    padding:12px 13px;color:var(--text);background:#091625;
-    outline:none;font-size:.82rem;transition:.18s ease
+  .id-stamp {
+    display: none; align-items: baseline; gap: 7px;
+    font-family: var(--mono); font-size: 0.82rem; color: var(--ledger);
+    border: 1px dashed var(--ledger); border-radius: 3px; padding: 7px 12px;
   }
-  input::placeholder{color:#53677f}
-  input:focus{border-color:rgba(53,199,163,.65);box-shadow:0 0 0 3px rgba(53,199,163,.08)}
-  input[type=number]{appearance:textfield}
-  .form-actions{display:flex;align-assets:center;flex-wrap:wrap;gap:10px;margin-top:17px}
-  .generated{
-    display:none;align-assets:center;gap:8px;padding:9px 12px;border-radius:11px;
-    background:rgba(53,199,163,.07);border:1px solid rgba(53,199,163,.28);
-    color:#8debd4;font-size:.74rem;font-weight:800;letter-spacing:.06em
-  }
-  .generated.visible{display:inline-flex}
-  .copy-btn{background:transparent;border:0;color:#8debd4;font-size:.7rem;font-weight:800;cursor:pointer}
+  .id-stamp.show { display: inline-flex; }
+  .id-stamp .k { color: var(--ink-dim); font-weight: 400; }
+  .id-stamp .v { font-weight: 700; letter-spacing: 1px; }
 
-  .log{
-    display:none;margin-top:13px;padding:10px 12px;border-radius:11px;
-    font-size:.73rem;line-height:1.5;word-break:break-word
+  /* ---------- Status log ---------- */
+  .log {
+    font-family: var(--mono); font-size: 0.78rem; line-height: 1.55;
+    padding: 10px 12px; border-radius: 3px; margin-top: 14px; display: none;
   }
-  .log.show{display:block}
-  .log.ok{color:#75e4c8;background:rgba(53,199,163,.07);border:1px solid rgba(53,199,163,.25)}
-  .log.err{color:#ff9ba4;background:rgba(255,107,120,.07);border:1px solid rgba(255,107,120,.24)}
+  .log.show { display: block; }
+  .log.ok { background: rgba(92,154,111,0.1); border: 1px solid var(--ledger); color: var(--ledger); }
+  .log.err { background: rgba(178,69,63,0.1); border: 1px solid var(--flag); color: var(--flag); }
 
-  /* Lookup */
-  .lookup-bar{display:grid;grid-template-columns:1fr auto;gap:10px}
-  .asset-info{
-    display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px
+  /* ---------- Result panels ---------- */
+  .vehicle-summary {
+    background: var(--surface-raised); border: 1px solid var(--line);
+    border-radius: 3px; padding: 14px 16px; margin-top: 16px; font-size: 0.88rem;
   }
-  .info-card{
-    padding:15px;border:1px solid var(--line);background:#091625;border-radius:14px
-  }
-  .info-card small{display:block;color:#70849b;font-size:.67rem;margin-bottom:5px}
-  .info-card strong{font-size:.86rem;word-break:break-word}
-  .history{margin-top:18px;display:grid;gap:10px}
-  .history-head{display:flex;align-assets:center;justify-content:space-between;margin-bottom:3px}
-  .history-head h3{margin:0;font-size:.82rem}
-  .history-head span{color:var(--muted);font-size:.68rem}
-  .record{
-    position:relative;padding:16px 16px 16px 20px;
-    border:1px solid var(--line);border-radius:15px;background:#091625;
-    overflow:hidden
-  }
-  .record:before{
-    content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--primary)
-  }
-  .record-top{display:flex;justify-content:space-between;gap:12px;align-assets:start}
-  .record-type{font-weight:850;font-size:.83rem}
-  .record-km{color:#8debd4;font-size:.72rem;font-weight:800;white-space:nowrap}
-  .record-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
-  .record-field{font-size:.72rem;color:#c0ccda}
-  .record-field span{display:block;color:#61768e;font-size:.64rem;margin-bottom:2px}
-  .record-notes{margin-top:11px;padding-top:10px;border-top:1px solid var(--line);font-size:.7rem;color:#8fa1b5;line-height:1.5}
-  .record-date{margin-top:10px;color:#60748a;font-size:.65rem}
-  .empty{
-    padding:26px 15px;text-align:center;border:1px dashed var(--line-strong);
-    border-radius:14px;color:var(--muted);font-size:.74rem
+  .vehicle-summary .field { margin-bottom: 5px; display: flex; gap: 8px; }
+  .vehicle-summary .field .k {
+    font-family: var(--mono); font-size: 0.7rem; color: var(--ink-dim);
+    width: 88px; flex-shrink: 0; padding-top: 2px; letter-spacing: 0.2px;
   }
 
-  footer{
-    display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;
-    margin-top:30px;padding:20px 4px 0;border-top:1px solid var(--line);
-    color:#5f738b;font-size:.68rem
+  .record {
+    background: var(--surface-raised); border: 1px solid var(--line);
+    border-left: 3px solid var(--stamp);
+    border-radius: 2px; padding: 14px 16px; margin-top: 10px; font-size: 0.88rem;
   }
-  footer a{color:#86a1bd;text-decoration:none}
-  footer a:hover{color:#8debd4}
+  .record .top-row {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  }
+  .record .type { font-weight: 600; color: var(--ink); }
+  .record .mileage { font-family: var(--mono); font-size: 0.78rem; color: var(--ink-dim); }
+  .record .detail { color: var(--ink-dim); font-size: 0.84rem; margin-top: 4px; }
+  .record .detail strong { color: var(--ink); font-weight: 500; }
+  .record .meta {
+    font-family: var(--mono); color: var(--ink-dim); font-size: 0.72rem;
+    margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line);
+  }
+  .empty-state {
+    color: var(--ink-dim); font-size: 0.86rem; text-align: center;
+    padding: 22px 0; border: 1px dashed var(--line); border-radius: 3px; margin-top: 14px;
+  }
 
-  @media(max-width:820px){
-    .hero{grid-template-columns:1fr}
-    .steps{grid-template-columns:1fr}
+  footer {
+    text-align: center; margin-top: 36px; padding-top: 18px;
+    border-top: 1px solid var(--line); font-family: var(--mono);
+    font-size: 0.72rem; color: var(--ink-dim); letter-spacing: 0.2px;
   }
-  @media(max-width:640px){
-    body{padding:18px 12px 42px}
-    .topbar{align-assets:flex-start;flex-direction:column}
-    .wallet{width:100%;justify-content:space-between}
-    .hero-card,.network-card,.panel{padding:20px;border-radius:20px}
-    .form-grid,.asset-info,.record-grid{grid-template-columns:1fr}
-    .field.full{grid-column:auto}
-    .lookup-bar{grid-template-columns:1fr}
-    .panel-head{flex-direction:column}
-    .tag{align-self:flex-start}
-    .hero-actions .btn{width:100%}
-    .lookup-bar .btn{width:100%}
+  footer a { color: var(--stamp); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 420px) {
+    .docket { padding: 18px 16px 16px; }
+    .vehicle-summary .field { flex-direction: column; gap: 1px; }
+    .vehicle-summary .field .k { width: auto; }
   }
 </style>
 </head>
 <body>
-<div class="shell">
+<div class="wrap">
 
-  <header class="topbar">
-    <div class="brand">
-      <div class="brand-mark">⌁</div>
-      <div>
-        <strong>Motolog</strong>
-        <span>On-chain service history</span>
-      </div>
+  <div class="masthead">
+    <div class="mark">
+      <span class="gear">⚙</span>
+      <h1>MOTOLOG</h1>
     </div>
-
-    <div class="wallet">
-      <div class="wallet-status">
-        <i id="walletDot" class="dot"></i>
-        <span id="walletStatus">Wallet not connected</span>
-      </div>
-      <button id="connectBtn" class="btn small">Connect Wallet</button>
-    </div>
-  </header>
-
-  <section class="hero">
-    <div class="hero-card">
-      <div class="eyebrow">Transparent service record</div>
-      <h1>A transparent and verifiable service history secured on the blockchain.</h1>
-      <p class="hero-copy">
-        Register vehicles or assets, log service records, and view the history by Item ID. 
-        The interface has been streamlined to ensure the workflow for recording and checking data is clear.
-      </p>
-      <div class="hero-actions">
-        <a href="#register" class="btn" style="text-decoration:none">Register an Asset</a>
-        <a href="#lookup" class="btn secondary" style="text-decoration:none">View Service History</a>
-      </div>
-    </div>
-
-    <aside class="network-card">
-      <h3>Network Status</h3>
-      <p>The frontend connects to the Motolog smart contract through your browser wallet.</p>
-      <div class="network-pill">
-        <div class="network-icon">◈</div>
-        <div>
-          <strong>BOT Chain</strong>
-          <span>Smart contract enabled</span>
-        </div>
-      </div>
-      <p class="network-note">A connected wallet is required to register assets and submit service records. Service history is retrieved directly from the smart contract.</p>
-    </aside>
-  </section>
-
-  <div class="section-title">
-    <div>
-      <h2>How It Works</h2>
-      <p>Three simple steps to manage and verify service history.</p>
-    </div>
+    <p class="tagline">A permanent, tamper-evident service record for every vehicle — logged on BOT Chain so history can never be lost or falsified.</p>
+    <div class="rule"></div>
   </div>
 
-  <section class="steps">
-    <div class="step"><div class="step-num">01</div><div><strong>Register an Asset</strong><span>Enter the asset name and generate a unique Item ID automatically.</span></div></div>
-    <div class="step"><div class="step-num">02</div><div><strong>Record a Service</strong><span>Record the service type, mileage, technician, owner, and additional notes.</span></div></div>
-    <div class="step"><div class="step-num">03</div><div><strong>Review Service History</strong><span>Use the Item ID to retrieve the asset details and complete service history.</span></div></div>
-  </section>
+  <div id="walletBar">
+    <span id="walletStatus">Wallet not connected</span>
+    <button id="connectBtn">Connect Wallet</button>
+  </div>
 
-  <!-- REGISTER -->
-  <section id="register" class="panel">
-    <div class="panel-head">
-      <div class="panel-title">
-        <div class="panel-icon">＋</div>
-        <div>
-          <h2>Register Asset</h2>
-          <p class="panel-desc">Create a new asset record. A six-character Item ID is generated automatically by the frontend.</p>
-        </div>
-      </div>
-      <span class="tag">STEP 01</span>
-    </div>
+  <!-- STEP 1 — REGISTER -->
+  <div class="docket" data-step="STEP 1">
+    <h2>Register a Vehicle</h2>
+    <p class="hint">Enter the vehicle's name and register it on-chain. A unique verification ID is minted automatically once the transaction confirms — no manual input required.</p>
 
-    <div class="form-grid">
-      <div class="field full">
-        <label for="itemNameInput">Asset Name</label>
-        <input id="itemNameInput" placeholder="Example: Honda Vario 2020 — Pink" autocomplete="off">
-      </div>
-    </div>
+    <label for="itemNameInput">Vehicle Name</label>
+    <input id="itemNameInput" placeholder="e.g. Honda Vario 160, Matte Black" />
 
-    <div class="form-actions">
-      <button id="registerBtn" class="btn">Register Asset</button>
-      <div id="generatedIdBadge" class="generated">
-        <span id="generatedIdText"></span>
-        <button id="copyIdBtn" class="copy-btn" type="button">Copy</button>
-      </div>
+    <div class="row-actions">
+      <button id="registerBtn">Register Vehicle</button>
+      <span id="generatedIdBadge" class="id-stamp"><span class="k">ID</span><span class="v"></span></span>
     </div>
     <div id="registerLog" class="log"></div>
-  </section>
+  </div>
 
-  <!-- SERVICE -->
-  <section class="panel">
-    <div class="panel-head">
-      <div class="panel-title">
-        <div class="panel-icon">⚙</div>
-        <div>
-          <h2>Add Service Record</h2>
-          <p class="panel-desc">Enter the service details that will be permanently recorded through a blockchain transaction.</p>
-        </div>
-      </div>
-      <span class="tag">STEP 02</span>
-    </div>
+  <!-- STEP 2 — ADD SERVICE RECORD -->
+  <div class="docket" data-step="STEP 2">
+    <h2>Log a Service Record</h2>
+    <p class="hint">Filled in by the workshop or technician performing the service. Requires the vehicle's verification ID from step one.</p>
 
-    <div class="form-grid">
-      <div class="field">
-        <label for="serviceItemId">Item ID</label>
-        <input id="serviceItemId" placeholder="Example: A3F9K2" autocomplete="off">
-      </div>
-      <div class="field">
-        <label for="serviceType">Service Type</label>
-        <input id="serviceType" placeholder="Example: Engine Oil Change" autocomplete="off">
-      </div>
-      <div class="field">
-        <label for="mileage">Current Mileage (KM)</label>
-        <input id="mileage" type="number" min="0" placeholder="Example: 12500" inputmode="numeric">
-      </div>
-      <div class="field">
-        <label for="technician">Technician / Workshop</label>
-        <input id="technician" placeholder="Example: Bengkel Jaya" autocomplete="off">
-      </div>
-      <div class="field">
-        <label for="serviceOwnerName">Owner Name</label>
-        <input id="serviceOwnerName" placeholder="Example: Budi Santoso" autocomplete="off">
-      </div>
-      <div class="field">
-        <label for="notes">Notes (Optional)</label>
-        <input id="notes" placeholder="Example: Routine maintenance at 12,000 km" autocomplete="off">
-      </div>
-    </div>
+    <label for="serviceItemId">Vehicle ID</label>
+    <input id="serviceItemId" data-mono placeholder="e.g. A3F9K2" />
 
-    <div class="form-actions">
-      <button id="addServiceBtn" class="btn">Save Service Record</button>
-      <button id="clearServiceBtn" class="btn secondary" type="button">Clear Form</button>
+    <label for="serviceType">Service Type</label>
+    <input id="serviceType" placeholder="e.g. Oil change" />
+
+    <label for="mileage">Mileage (km)</label>
+    <input id="mileage" type="number" min="0" placeholder="e.g. 12500" />
+
+    <label for="technician">Technician / Workshop</label>
+    <input id="technician" placeholder="e.g. Jaya Motor Workshop" />
+
+    <label for="serviceOwnerName">Owner Name</label>
+    <input id="serviceOwnerName" placeholder="e.g. Budi Santoso" />
+
+    <label for="notes">Notes (optional)</label>
+    <input id="notes" placeholder="e.g. Routine service at 12,000 km, Shell 10W-40" />
+
+    <div class="row-actions">
+      <button id="addServiceBtn">Submit Record</button>
     </div>
     <div id="serviceLog" class="log"></div>
-  </section>
+  </div>
 
-  <!-- LOOKUP -->
-  <section id="lookup" class="panel">
-    <div class="panel-head">
-      <div class="panel-title">
-        <div class="panel-icon">⌕</div>
-        <div>
-          <h2>View Service History Service</h2>
-          <p class="panel-desc">Enter an Item ID to retrieve the asset details and complete service history.</p>
-        </div>
-      </div>
-      <span class="tag">STEP 03</span>
+  <!-- STEP 3 — VERIFY -->
+  <div class="docket" data-step="STEP 3">
+    <h2>Verify Service History</h2>
+    <p class="hint">Open to anyone — no wallet connection required. Useful for a prospective buyer checking a used vehicle's full maintenance record.</p>
+
+    <label for="lookupItemId">Vehicle ID</label>
+    <input id="lookupItemId" data-mono placeholder="e.g. A3F9K2" />
+
+    <div class="row-actions">
+      <button id="lookupBtn">Verify History</button>
     </div>
-
-    <div class="lookup-bar">
-      <input id="lookupItemId" placeholder="Enter Item ID, e.g. A3F9K2" autocomplete="off">
-      <button id="lookupBtn" class="btn">View Service History</button>
-    </div>
-
     <div id="lookupLog" class="log"></div>
+
     <div id="itemInfoBox"></div>
     <div id="historyBox"></div>
-  </section>
+  </div>
 
   <footer>
-    <span>Motolog • On-chain service history</span>
-    <span>Powered by <strong>BOT Chain</strong> · <a href="https://botchain.ai" target="_blank" rel="noopener">botchain.ai</a> · <a id="explorerLink" href="#" target="_blank" rel="noopener">Explorer</a></span>
+    Built on <strong>BOT Chain</strong> — <a href="https://botchain.ai" target="_blank" rel="noopener">botchain.ai</a> · <a href="#" id="explorerLink" target="_blank" rel="noopener">View on BOT Explorer ↗</a>
   </footer>
+
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
 <script>
   // ==========================================================
-  // CONTRACT CONFIGURATION
+  // CONFIGURATION — set these before deploying
   // ==========================================================
-  const CONTRACT_ADDRESS = "0x11829D56380E82eFd999412F8E18a3e7748530C0";
-  const EXPLORER_BASE_URL = "https://scan.bohr.life/address/";
+  const CONTRACT_ADDRESS = "0xPASTE_YOUR_DEPLOYED_CONTRACT_ADDRESS";
+  const EXPLORER_BASE_URL = "https://scan.bohr.life/";
   document.getElementById("explorerLink").href = EXPLORER_BASE_URL + CONTRACT_ADDRESS;
 
   const CONTRACT_ABI = [
@@ -429,7 +286,7 @@
         { "indexed": false, "internalType": "string", "name": "itemId", "type": "string" },
         { "indexed": false, "internalType": "string", "name": "itemName", "type": "string" }
       ],
-      "name": "AssetRegistered", "type": "event"
+      "name": "ItemRegistered", "type": "event"
     },
     {
       "anonymous": false,
@@ -449,7 +306,7 @@
         { "internalType": "string", "name": "itemId", "type": "string" },
         { "internalType": "string", "name": "itemName", "type": "string" }
       ],
-      "name": "registerAsset", "outputs": [],
+      "name": "registerItem", "outputs": [],
       "stateMutability": "nonpayable", "type": "function"
     },
     {
@@ -482,48 +339,28 @@
     },
     {
       "inputs": [{ "internalType": "string", "name": "itemId", "type": "string" }],
-      "name": "getAsset",
+      "name": "getItem",
       "outputs": [{
         "components": [
           { "internalType": "string", "name": "itemName", "type": "string" },
           { "internalType": "bool", "name": "exists", "type": "bool" }
         ],
-        "internalType": "struct Motolog.Asset", "name": "", "type": "tuple"
+        "internalType": "struct Motolog.Item", "name": "", "type": "tuple"
       }],
       "stateMutability": "view", "type": "function"
     }
   ];
+  // ==========================================================
 
   let provider, signer, contract, userAddress;
 
-  const $ = (id) => document.getElementById(id);
-  const walletStatus = $("walletStatus");
-  const walletDot = $("walletDot");
-  const connectBtn = $("connectBtn");
+  const walletStatus = document.getElementById("walletStatus");
+  const connectBtn = document.getElementById("connectBtn");
 
-  function showLog(elId, message, isError = false) {
-    const el = $(elId);
+  function showLog(elId, message, isError) {
+    const el = document.getElementById(elId);
     el.textContent = message;
     el.className = "log show " + (isError ? "err" : "ok");
-  }
-
-  function getErrorMessage(err) {
-    return String(err?.reason || err?.data?.message || err?.message || err || "An unexpected error occurred.");
-  }
-
-  function escapeHtml(value) {
-    return String(value ?? "").replace(/[&<>"']/g, char => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-    }[char]));
-  }
-
-  function generateRandomId() {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    let code = "";
-    for (let i = 0; i < 6; i++) {
-      code += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return code;
   }
 
   async function connectWallet() {
@@ -531,7 +368,6 @@
       alert("MetaMask was not detected. Please install MetaMask to continue.");
       return;
     }
-
     try {
       provider = new ethers.providers.Web3Provider(window.ethereum);
       await provider.send("eth_requestAccounts", []);
@@ -540,48 +376,55 @@
       contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
       walletStatus.textContent = userAddress.slice(0, 6) + "..." + userAddress.slice(-4);
-      walletDot.classList.add("connected");
+      walletStatus.classList.add("connected");
       connectBtn.textContent = "Connected";
       connectBtn.disabled = true;
     } catch (err) {
       console.error(err);
-      alert("Wallet connection failed: " + getErrorMessage(err));
+      alert("Could not connect wallet: " + (err.message || err));
     }
   }
 
-  async function registerAsset() {
-    if (!contract) return alert("Please connect your wallet first.");
+  // Unique identifier generator — 4 to 8 alphanumeric characters.
+  // Excludes 0/O/1/I to avoid ambiguity when read off a printed sticker or QR label.
+  function generateRandomId() {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const length = 4 + Math.floor(Math.random() * 5); // 4..8
+    let code = "";
+    for (let i = 0; i < length; i++) {
+      code += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return code;
+  }
 
-    const name = $("itemNameInput").value.trim();
-    if (!name) return alert("Please enter an asset name first.");
+  async function registerItem() {
+    if (!contract) return alert("Connect your wallet first.");
+    const name = document.getElementById("itemNameInput").value.trim();
+    if (!name) return alert("Enter a vehicle name first.");
 
-    const badge = $("generatedIdBadge");
-    badge.classList.remove("visible");
+    const badge = document.getElementById("generatedIdBadge");
+    badge.classList.remove("show");
 
     let itemId = generateRandomId();
     const MAX_RETRY = 5;
 
     for (let attempt = 0; attempt < MAX_RETRY; attempt++) {
       try {
-        showLog("registerLog",
-          attempt === 0 ? "Submitting transaction..." : `Item ID already exists. Generating a new ID (${attempt + 1}/${MAX_RETRY})...`,
-          false
-        );
-
-        const tx = await contract.registerAsset(itemId, name);
+        showLog("registerLog", attempt === 0 ? "Submitting transaction..." : `ID collision — generating a new one (attempt ${attempt + 1})...`, false);
+        const tx = await contract.registerItem(itemId, name);
         showLog("registerLog", "Waiting for blockchain confirmation...", false);
         await tx.wait();
 
-        $("generatedIdText").textContent = "ID: " + itemId;
-        badge.classList.add("visible");
+        badge.querySelector(".v").textContent = itemId;
+        badge.classList.add("show");
 
-        showLog("registerLog", `Success! Asset ${itemId} has been registered.`, false);
+        showLog("registerLog", `Vehicle registered successfully with ID ${itemId}.`, false);
 
-        $("serviceItemId").value = itemId;
-        $("lookupItemId").value = itemId;
+        document.getElementById("serviceItemId").value = itemId;
+        document.getElementById("lookupItemId").value = itemId;
         return;
       } catch (err) {
-        const msg = getErrorMessage(err);
+        const msg = (err.reason || err.message || "").toString();
         if (msg.includes("ItemAlreadyExists")) {
           itemId = generateRandomId();
           continue;
@@ -591,156 +434,88 @@
         return;
       }
     }
-
-    showLog("registerLog", "Failed: terlalu banyak percobaan. Silakan coba lagi.", true);
+    showLog("registerLog", "Failed after several attempts — please try registering again.", true);
   }
 
   async function addServiceRecord() {
-    if (!contract) return alert("Please connect your wallet first.");
-
-    const itemId = $("serviceItemId").value.trim();
-    const serviceType = $("serviceType").value.trim();
-    const mileage = $("mileage").value.trim();
-    const technician = $("technician").value.trim();
-    const ownerName = $("serviceOwnerName").value.trim();
-    const notes = $("notes").value.trim();
+    if (!contract) return alert("Connect your wallet first.");
+    const itemId = document.getElementById("serviceItemId").value.trim();
+    const serviceType = document.getElementById("serviceType").value.trim();
+    const mileage = document.getElementById("mileage").value.trim();
+    const technician = document.getElementById("technician").value.trim();
+    const ownerName = document.getElementById("serviceOwnerName").value.trim();
+    const notes = document.getElementById("notes").value.trim();
 
     if (!itemId || !serviceType || !technician || !mileage || !ownerName) {
-      return alert("Isi Item ID, Service Type, KM, Nama Teknisi, dan Owner Name.");
-    }
-    if (!/^\d+$/.test(mileage)) {
-      return alert("Mileage must be a valid number.");
+      return alert("Vehicle ID, service type, mileage, technician, and owner name are required.");
     }
 
     try {
-      $("addServiceBtn").disabled = true;
       showLog("serviceLog", "Submitting transaction...", false);
-      const tx = await contract.addServiceRecord(
-        itemId, serviceType, technician, ownerName, notes, mileage
-      );
+      const tx = await contract.addServiceRecord(itemId, serviceType, technician, ownerName, notes, mileage);
       showLog("serviceLog", "Waiting for blockchain confirmation...", false);
       await tx.wait();
-      showLog("serviceLog", "Service record successfully added to the blockchain.", false);
+      showLog("serviceLog", "Service record added successfully.", false);
     } catch (err) {
       console.error(err);
-      showLog("serviceLog", "Failed: " + getErrorMessage(err), true);
-    } finally {
-      $("addServiceBtn").disabled = false;
+      showLog("serviceLog", "Failed: " + (err.reason || err.message || err), true);
     }
   }
 
   async function lookupHistory() {
-    if (!contract) return alert("Please connect your wallet first.");
+    if (!contract) return alert("Connect your wallet first.");
+    const itemId = document.getElementById("lookupItemId").value.trim();
+    if (!itemId) return alert("Enter a vehicle ID first.");
 
-    const itemId = $("lookupItemId").value.trim();
-    if (!itemId) return alert("Please enter an Item ID first.");
-
-    $("itemInfoBox").innerHTML = "";
-    $("historyBox").innerHTML = "";
+    const itemInfoBox = document.getElementById("itemInfoBox");
+    const historyBox = document.getElementById("historyBox");
+    itemInfoBox.innerHTML = "";
+    historyBox.innerHTML = "";
 
     try {
-      $("lookupBtn").disabled = true;
-      showLog("lookupLog", "Retrieving data from the blockchain...", false);
-
-      const asset = await contract.getAsset(itemId);
+      showLog("lookupLog", "Fetching records...", false);
+      const item = await contract.getItem(itemId);
       const history = await contract.getServiceHistory(itemId);
 
-      $("itemInfoBox").innerHTML = `
-        <div class="asset-info">
-          <div class="info-card">
-            <small>NAMA ITEM</small>
-            <strong>${escapeHtml(asset.itemName)}</strong>
-          </div>
-          <div class="info-card">
-            <small>ITEM ID</small>
-            <strong>${escapeHtml(itemId)}</strong>
-          </div>
-        </div>
-      `;
+      itemInfoBox.innerHTML = `
+        <div class="vehicle-summary">
+          <div class="field"><span class="k">Vehicle</span><span>${item.itemName}</span></div>
+          <div class="field"><span class="k">Vehicle ID</span><span style="font-family:var(--mono)">${itemId}</span></div>
+        </div>`;
 
       if (history.length === 0) {
-        $("historyBox").innerHTML = `
-          <div class="history">
-            <div class="history-head"><h3>Service History</h3><span>0 record</span></div>
-            <div class="empty">Asset found, but no service records have been registered yet.</div>
-          </div>
-        `;
+        historyBox.innerHTML = `<div class="empty-state">No service records yet for this vehicle.</div>`;
       } else {
-        const records = history.map((r) => {
-          const timestamp = Number(r.timestamp.toString()) * 1000;
-          const date = new Date(timestamp).toLocaleString("en-US", {
-            dateStyle: "medium",
-            timeStyle: "short"
+        historyBox.innerHTML = history.map(r => {
+          const date = new Date(r.timestamp.toNumber() * 1000).toLocaleString("en-US", {
+            year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
           });
-
           return `
-            <article class="record">
-              <div class="record-top">
-                <div class="record-type">${escapeHtml(r.serviceType)}</div>
-                <div class="record-km">${escapeHtml(r.mileage.toString())} KM</div>
+            <div class="record">
+              <div class="top-row">
+                <span class="type">${r.serviceType}</span>
+                <span class="mileage">${r.mileage.toString()} km</span>
               </div>
-              <div class="record-grid">
-                <div class="record-field"><span>TECHNICIAN / WORKSHOP</span>${escapeHtml(r.technician)}</div>
-                <div class="record-field"><span>OWNER</span>${escapeHtml(r.ownerName)}</div>
-              </div>
-              ${r.notes ? `<div class="record-notes">${escapeHtml(r.notes)}</div>` : ""}
-              <div class="record-date">${escapeHtml(date)}</div>
-            </article>
-          `;
+              <div class="detail"><strong>${r.technician}</strong> · owner on record: ${r.ownerName}</div>
+              ${r.notes ? `<div class="detail">${r.notes}</div>` : ""}
+              <div class="meta">${date}</div>
+            </div>`;
         }).join("");
-
-        $("historyBox").innerHTML = `
-          <div class="history">
-            <div class="history-head">
-              <h3>Service History</h3>
-              <span>${history.length} record</span>
-            </div>
-            ${records}
-          </div>
-        `;
       }
 
-      showLog("lookupLog", "Data loaded successfully.", false);
+      showLog("lookupLog", "Records loaded.", false);
     } catch (err) {
       console.error(err);
-      showLog("lookupLog", "Unable to retrieve the data. The asset may not be registered. " + getErrorMessage(err), true);
-    } finally {
-      $("lookupBtn").disabled = false;
+      showLog("lookupLog", "Failed — this vehicle may not be registered yet. (" + (err.reason || err.message || err) + ")", true);
     }
   }
-
-  function clearServiceForm() {
-    ["serviceType","mileage","technician","serviceOwnerName","notes"].forEach(id => $(id).value = "");
-    $("serviceLog").className = "log";
-  }
-
-  $("copyIdBtn").addEventListener("click", async () => {
-    const text = $("generatedIdText").textContent.replace(/^ID:\s*/, "");
-    if (!text) return;
-    try {
-      await navigator.clipboard.writeText(text);
-      $("copyIdBtn").textContent = "Copied";
-      setTimeout(() => $("copyIdBtn").textContent = "Copy", 1200);
-    } catch {
-      alert("ID: " + text);
-    }
-  });
 
   connectBtn.addEventListener("click", connectWallet);
-  $("registerBtn").addEventListener("click", registerAsset);
-  $("addServiceBtn").addEventListener("click", addServiceRecord);
-  $("clearServiceBtn").addEventListener("click", clearServiceForm);
-  $("lookupBtn").addEventListener("click", lookupHistory);
-
-  // Press Enter in the lookup field to start the search.
-  $("lookupItemId").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") lookupHistory();
-  });
-
-  // Reload the frontend state when the connected wallet account changes.
-  if (window.ethereum) {
-    window.ethereum.on("accountsChanged", () => window.location.reload());
-  }
+  document.getElementById("registerBtn").addEventListener("click", registerItem);
+  document.getElementById("addServiceBtn").addEventListener("click", addServiceRecord);
+  document.getElementById("lookupBtn").addEventListener("click", lookupHistory);
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
 </body>
 </html>
