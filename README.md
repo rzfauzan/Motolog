@@ -52,7 +52,7 @@ Open `index.html` and set the following near the top of the `<script>` section:
 
 ```js
 const CONTRACT_ADDRESS = "0xYourDeployedContractAddress";
-const EXPLORER_BASE_URL = "https://scan.bohr.life/address";
+const EXPLORER_BASE_URL = "https://xxxxxxxxxxxx/address";
 ```
 
 ### 3. Host it
