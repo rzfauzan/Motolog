@@ -41,7 +41,7 @@ Paper service records get lost, and handwritten mileage or dates can be altered.
 
 ### 1. Deploy the contract
 
-1. Open [Remix IDE](https://remix.ethereum.org) and create `Motolog.sol` using the source in this repo.
+1. Open [Remix IDE](https://remix.ethereum.org) and create `MyCertificate.sol` using the source in this repo.
 2. Compile with Solidity `0.8.20`.
 3. In **Deploy & Run**, set the environment to **Injected Provider – MetaMask**, connect to BOT Chain, and deploy.
 4. Copy the deployed contract address.
