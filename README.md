@@ -52,10 +52,10 @@ Open `index.html` and set the following near the top of the `<script>` section:
 
 ```js
 const CONTRACT_ADDRESS = "0xYourDeployedContractAddress";
-const EXPLORER_BASE_URL = "https://scan.botchain.ai/"; // mainnet explorer — use https://scan.bohr.life/ for testnet
+const EXPLORER_BASE_URL = "https://scan.botchain.ai/address/"; // mainnet explorer — use https://scan.bohr.life/ (no /address/) for testnet
 ```
 
-`CONTRACT_ADDRESS` and `EXPLORER_BASE_URL` must point to the **same network**: testnet address with the testnet explorer, or mainnet address with the mainnet explorer. The live site submitted for judging uses the **mainnet** values.
+`CONTRACT_ADDRESS` and `EXPLORER_BASE_URL` must point to the **same network**: testnet address with the testnet explorer format, or mainnet address with the mainnet explorer format. Note the two explorers use different URL structures — testnet is `https://scan.bohr.life/{address}` while mainnet is `https://scan.botchain.ai/address/{address}`. The live site submitted for judging uses the **mainnet** values.
 
 ### 3. Host it
 
