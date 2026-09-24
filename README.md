@@ -22,7 +22,7 @@ Paper service records get lost, and handwritten mileage or dates can be altered.
 
 ```
 ├── Motolog.sol     # Smart contract (source of truth for on-chain logic)
-├── index.html            # Frontend — register vehicles, log services, verify history
+├── index.html      # Frontend — register vehicles, log services, verify history
 └── README.md
 ```
 
@@ -52,8 +52,10 @@ Open `index.html` and set the following near the top of the `<script>` section:
 
 ```js
 const CONTRACT_ADDRESS = "0xYourDeployedContractAddress";
-const EXPLORER_BASE_URL = "https://xxxxxxxxxxxx/address";
+const EXPLORER_BASE_URL = "https://scan.botchain.ai/"; // mainnet explorer — use https://scan.bohr.life/ for testnet
 ```
+
+`CONTRACT_ADDRESS` and `EXPLORER_BASE_URL` must point to the **same network**: testnet address with the testnet explorer, or mainnet address with the mainnet explorer. The live site submitted for judging uses the **mainnet** values.
 
 ### 3. Host it
 
@@ -66,7 +68,7 @@ Push `index.html` to a GitHub repository and enable **GitHub Pages** (Settings �
 | BOT Chain Testnet | `0x3929052C57270E2EbB855172033d4C092AF6887B` |
 | BOT Chain Mainnet | `0x11829D56380E82eFd999412F8E18a3e7748530C0` |
 
-## Network details (BOT Chain Testnet)
+## Network details
 
 | Field | Value |
 |---|---|
@@ -82,7 +84,7 @@ Push `index.html` to a GitHub repository and enable **GitHub Pages** (Settings �
 | RPC URL | https://rpc.botchain.ai |
 | Chain ID | 677 |
 | Currency Symbol | BOT |
-| Block Explorer | 	https://scan.botchain.ai |
+| Block Explorer | https://scan.botchain.ai |
 
 ## License
 
