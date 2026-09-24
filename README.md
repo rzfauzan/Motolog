@@ -64,7 +64,7 @@ Push `index.html` to a GitHub repository and enable **GitHub Pages** (Settings â
 | Network | Contract Address |
 |---|---|
 | BOT Chain Testnet | `0x3929052C57270E2EbB855172033d4C092AF6887B` |
-| BOT Chain Mainnet | `0x...` |
+| BOT Chain Mainnet | `0x11829D56380E82eFd999412F8E18a3e7748530C0` |
 
 ## Network details (BOT Chain Testnet)
 
