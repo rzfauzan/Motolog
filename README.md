@@ -24,6 +24,7 @@ Paper service records get lost, and handwritten mileage or dates can be altered.
 ├── Motolog.sol     # Smart contract (source of truth for on-chain logic)
 ├── index.html      # Frontend — register vehicles, log services, verify history
 ├── README.md
+├── CNAME
 └── icons
     ├── botchain.png
     └── motolog.png
