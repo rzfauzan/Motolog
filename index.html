@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MotoLog — Verified Service History on BOT Chain</title>
+<link rel="icon" type="image/png" href="icons/motolog.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -20,6 +21,7 @@
     --stamp-dim: #8f3309;
     --ledger: #5c9a6f;
     --flag: #b2453f;
+    --plate: #f3ecdb;
     --serif: 'IBM Plex Serif', Georgia, 'Times New Roman', serif;
     --mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
   }
@@ -39,31 +41,45 @@
     -webkit-font-smoothing: antialiased;
   }
   .wrap { max-width: 620px; margin: 0 auto; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
 
   /* ---------- Masthead ---------- */
-  .masthead { margin-bottom: 30px; }
-  .masthead .mark {
-    display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px;
+  .masthead { margin-bottom: 26px; }
+  .masthead .brand { display: flex; align-items: center; gap: 22px; }
+  /* The MotoLog logo has dark lettering, so it sits on a light plate */
+  .logo-plate {
+    flex-shrink: 0; background: var(--plate); border-radius: 3px;
+    padding: 10px 14px; border: 1px solid var(--line);
+    box-shadow: 0 0 0 4px var(--bg), 0 0 0 5px var(--line-soft);
   }
-  .masthead .mark .gear { font-size: 1.3rem; line-height: 1; transform: translateY(1px); }
-  .masthead h1 {
-    font-family: var(--mono); font-weight: 700; letter-spacing: 0.5px;
-    font-size: 1.5rem; margin: 0; color: var(--ink);
-  }
+  .logo-plate img { display: block; width: 132px; height: auto; }
   .masthead .tagline {
-    font-size: 0.92rem; color: var(--ink-dim); margin: 0; max-width: 46ch;
-    line-height: 1.5;
+    font-size: 0.92rem; color: var(--ink-dim); margin: 0; max-width: 40ch;
+    line-height: 1.55;
   }
   .masthead .rule {
-    height: 1px; margin-top: 18px;
+    height: 1px; margin-top: 22px;
     background: repeating-linear-gradient(90deg, var(--line) 0, var(--line) 6px, transparent 6px, transparent 11px);
   }
+
+  /* ---------- Partner strip ---------- */
+  .partner {
+    display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    margin-bottom: 14px; padding: 0 2px;
+    font-size: 0.8rem; color: var(--ink-dim);
+  }
+  .partner a { display: inline-flex; align-items: center; gap: 9px; text-decoration: none; color: var(--ink); }
+  .partner img { display: block; height: 26px; width: auto; }
+  .partner .name { font-family: var(--mono); font-weight: 600; font-size: 0.85rem; }
 
   /* ---------- Wallet strip ---------- */
   #walletBar {
     display: flex; align-items: center; justify-content: space-between; gap: 12px;
     background: var(--surface); border: 1px solid var(--line);
-    border-radius: 3px; padding: 13px 16px; margin: 22px 0 28px;
+    border-radius: 3px; padding: 13px 16px; margin: 0 0 28px;
   }
   #walletStatus {
     font-family: var(--mono); font-size: 0.78rem; color: var(--ink-dim); letter-spacing: 0.2px;
@@ -179,6 +195,10 @@
   footer a { color: var(--stamp); text-decoration: none; }
   footer a:hover { text-decoration: underline; }
 
+  @media (max-width: 480px) {
+    .masthead .brand { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .logo-plate img { width: 120px; }
+  }
   @media (max-width: 420px) {
     .docket { padding: 18px 16px 16px; }
     .vehicle-summary .field { flex-direction: column; gap: 1px; }
@@ -190,12 +210,20 @@
 <div class="wrap">
 
   <div class="masthead">
-    <div class="mark">
-      <span class="gear">⚙</span>
-      <h1>MOTOLOG</h1>
+    <div class="brand">
+      <div class="logo-plate"><img src="icons/motolog.png" alt="MotoLog — decentralized vehicle service history" width="132" height="129"></div>
+      <h1 class="sr-only">MotoLog</h1>
+      <p class="tagline">A permanent, tamper-evident service record for every vehicle — logged on BOT Chain so history can never be lost or falsified.</p>
     </div>
-    <p class="tagline">A permanent, tamper-evident service record for every vehicle — logged on BOT Chain so history can never be lost or falsified.</p>
     <div class="rule"></div>
+  </div>
+
+  <div class="partner">
+    <span>In partnership with</span>
+    <a href="https://botchain.ai" target="_blank" rel="noopener" aria-label="BOT Chain">
+      <img src="icons/botchain.png" alt="" width="16" height="26">
+      <span class="name">BOT Chain</span>
+    </a>
   </div>
 
   <div id="walletBar">
